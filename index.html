@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Carrera de Países</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #111;
+      color: white;
+      text-align: center;
+      padding-top: 20px;
+    }
+
+    .banderas {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      align-items: center;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .bandera {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+
+    .bandera img {
+      width: 70px;
+      height: 50px;
+      border-radius: 6px;
+    }
+
+    .contador {
+      margin-top: 5px;
+      font-size: 43.4px;
+      color: yellow;
+    }
+
+    .banderas button {
+      margin-top: 4px;
+      padding: 4px 10px;
+      font-size: 14px;
+      background: #888;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .banderas button:hover {
+      background: #aaa;
+    }
+
+    .track {
+      position: relative;
+      margin: 10px auto;
+      width: 90%;
+      height: 70px;
+      background: #333;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .runner {
+      position: absolute;
+      top: 10px;
+      width: 60px;
+      height: 50px;
+      background-size: cover;
+      transition: left 0.15s ease-out;
+    }
+
+    #winner {
+      font-size: 24px;
+      margin-top: 20px;
+      color: yellow;
+    }
+
+    @keyframes bounce {
+      0% { transform: translateY(0); }
+      30% { transform: translateY(-20px); }
+      60% { transform: translateY(10px); }
+      100% { transform: translateY(0); }
+    }
+
+    .runner.bouncing {
+      animation: bounce 0.3s ease;
+    }
+
+    @keyframes idle {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    .runner.idle {
+      animation: idle 1.5s infinite ease-in-out;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      background: #555;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #777;
+    }
+
+    .flag-fullscreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: black;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      animation: fadeInOut 2s ease-in-out;
+    }
+
+    .flag-fullscreen img {
+      width: 60%;
+      height: auto;
+      border-radius: 20px;
+    }
+
+    @keyframes fadeInOut {
+      0% { opacity: 0; }
+      15% { opacity: 1; }
+      85% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    .meta {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 30px;
+      height: 100%;
+      background: repeating-linear-gradient(
+        to bottom,
+        #ccc,
+        #ccc 10px,
+        #000 10px,
+        #000 20px
+      );
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      writing-mode: vertical-rl;
+      color: yellow;
+      font-weight: 900;
+      font-size: 18px;
+      text-shadow: 0 0 2px #000, 0 0 3px #000;
+    }
+
+    .bandera.eliminada img {
+      filter: grayscale(100%) brightness(0.4);
+      opacity: 0.5;
+    }
+
+    .bandera.eliminada::after {
+      content: "✖";
+      color: red;
+      font-size: 38px;
+      font-weight: bold;
+      position: absolute;
+      top: 5px;
+      left: 20px;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    /* Estilos para el selector de fondo */
+    .fondo-selector {
+      margin-top: 20px;
+      position: relative;
+      display: inline-block;
+    }
+
+    .fondo-boton {
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #555;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+
+    .fondo-boton:hover {
+      background: #777;
+    }
+
+    .fondo-lista {
+      display: none;
+      position: absolute;
+      background-color: #333;
+      min-width: 160px;
+      box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+      z-index: 1;
+      left: 50%;
+      transform: translateX(-50%);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .fondo-lista a {
+      color: white;
+      padding: 12px 16px;
+      text-decoration: none;
+      display: block;
+      cursor: pointer;
+    }
+
+    .fondo-lista a:hover {
+      background-color: #555;
+    }
+
+    .fondo-seleccionado {
+      background-color: rgba(0,0,0,0.5);
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background-size: cover;
+      background-position: center;
+      opacity: 0.2;
+      transition: background-image 0.5s ease;
+    }
+  </style>
+</head>
+<body>
+
+<div class="fondo-seleccionado" id="fondoSeleccionado"></div>
+
+<div class="banderas">
+  <div class="bandera">
+    <img src="https://flagcdn.com/w80/ve.png" alt="Venezuela">
+    <div class="contador" id="v_venezuela">0</div>
+    <button onclick="sumarVictoria('venezuela')">+</button>
+    <button onclick="restarVictoria('venezuela')">−</button>
+    <button onclick="eliminarBandera('venezuela')">X</button>
+  </div>
+  <div class="bandera">
+    <img src="https://flagcdn.com/w80/mx.png" alt="México">
+    <div class="contador" id="v_mexico">0</div>
+    <button onclick="sumarVictoria('mexico')">+</button>
+    <button onclick="restarVictoria('mexico')">−</button>
+    <button onclick="eliminarBandera('mexico')">X</button>
+  </div>
+  <div class="bandera">
+    <img src="https://flagcdn.com/w80/cl.png" alt="Chile">
+    <div class="contador" id="v_chile">0</div>
+    <button onclick="sumarVictoria('chile')">+</button>
+    <button onclick="restarVictoria('chile')">−</button>
+    <button onclick="eliminarBandera('chile')">X</button>
+  </div>
+  <div class="bandera">
+    <img src="https://flagcdn.com/w80/co.png" alt="Colombia">
+    <div class="contador" id="v_colombia">0</div>
+    <button onclick="sumarVictoria('colombia')">+</button>
+    <button onclick="restarVictoria('colombia')">−</button>
+    <button onclick="eliminarBandera('colombia')">X</button>
+  </div>
+  <div class="bandera">
+    <img src="https://flagcdn.com/w80/ec.png" alt="Ecuador">
+    <div class="contador" id="v_ecuador">0</div>
+    <button onclick="sumarVictoria('ecuador')">+</button>
+    <button onclick="restarVictoria('ecuador')">−</button>
+    <button onclick="eliminarBandera('ecuador')">X</button>
+  </div>
+  <div class="bandera">
+    <img src="https://flagcdn.com/w80/gt.png" alt="Guatemala">
+    <div class="contador" id="v_guatemala">0</div>
+    <button onclick="sumarVictoria('guatemala')">+</button>
+    <button onclick="restarVictoria('guatemala')">−</button>
+    <button onclick="eliminarBandera('guatemala')">X</button>
+  </div>
+  <div class="bandera">
+    <img src="https://flagcdn.com/w80/sv.png" alt="El Salvador">
+    <div class="contador" id="v_el_salvador">0</div>
+    <button onclick="sumarVictoria('el_salvador')">+</button>
+    <button onclick="restarVictoria('el_salvador')">−</button>
+    <button onclick="eliminarBandera('el_salvador')">X</button>
+  </div>
+  <div class="bandera">
+    <img src="https://flagcdn.com/w80/do.png" alt="República Dominicana">
+    <div class="contador" id="v_rep_dominicana">0</div>
+    <button onclick="sumarVictoria('rep_dominicana')">+</button>
+    <button onclick="restarVictoria('rep_dominicana')">−</button>
+    <button onclick="eliminarBandera('rep_dominicana')">X</button>
+  </div>
+  <div class="bandera">
+    <img src="https://flagcdn.com/w80/ar.png" alt="Argentina">
+    <div class="contador" id="v_argentina">0</div>
+    <button onclick="sumarVictoria('argentina')">+</button>
+    <button onclick="restarVictoria('argentina')">−</button>
+    <button onclick="eliminarBandera('argentina')">X</button>
+  </div>
+  <div class="bandera">
+    <img src="https://flagcdn.com/w80/cr.png" alt="Costa Rica">
+    <div class="contador" id="v_costa_rica">0</div>
+    <button onclick="sumarVictoria('costa_rica')">+</button>
+    <button onclick="restarVictoria('costa_rica')">−</button>
+    <button onclick="eliminarBandera('costa_rica')">X</button>
+  </div>
+  <div class="bandera">
+    <img src="https://flagcdn.com/w80/hn.png" alt="Honduras">
+    <div class="contador" id="v_honduras">0</div>
+    <button onclick="sumarVictoria('honduras')">+</button>
+    <button onclick="restarVictoria('honduras')">−</button>
+    <button onclick="eliminarBandera('honduras')">X</button>
+  </div>
+</div>
+
+<!-- Pistas -->
+<div class="track"><div class="runner" id="venezuela" style="background-image: url('https://flagcdn.com/w80/ve.png'); left: 0;"></div><div class="meta">META</div></div>
+<div class="track"><div class="runner" id="mexico" style="background-image: url('https://flagcdn.com/w80/mx.png'); left: 0;"></div><div class="meta">META</div></div>
+<div class="track">
+  <div class="runner" id="chile" style="background-image: url('https://flagcdn.com/w80/cl.png'); left: 0;">
+  </div>
+  <div class="meta">META</div>
+</div>
+<div class="track"><div class="runner" id="colombia" style="background-image: url('https://flagcdn.com/w80/co.png'); left: 0;"></div><div class="meta">META</div></div>
+<div class="track"><div class="runner" id="ecuador" style="background-image: url('https://flagcdn.com/w80/ec.png'); left: 0;"></div><div class="meta">META</div></div><div class="track"><div class="runner" id="guatemala" style="background-image: url('https://flagcdn.com/w80/gt.png'); left: 0;">
+</div><div class="meta">META</div></div>
+<div class="track"><div class="runner" id="el_salvador" style="background-image: url('https://flagcdn.com/w80/sv.png'); left: 0;"></div><div class="meta">META</div></div>
+<div class="track"><div class="runner" id="rep_dominicana" style="background-image: url('https://flagcdn.com/w80/do.png'); left: 0;"></div><div class="meta">META</div></div>
+<div class="track"><div class="runner" id="argentina" style="background-image: url('https://flagcdn.com/w80/ar.png'); left: 0;"></div><div class="meta">META</div></div>
+<div class="track"><div class="runner" id="costa_rica" style="background-image: url('https://flagcdn.com/w80/cr.png'); left: 0;"></div><div class="meta">META</div></div>
+<div class="track"><div class="runner" id="honduras" style="background-image: url('https://flagcdn.com/w80/hn.png'); left: 0;"></div><div class="meta">META</div></div>
+
+<div id="winner"></div>
+<div style="display: inline-block;">
+  <button onclick="reiniciarCarrera()">Reiniciar carrera</button>
+  <div class="fondo-selector">
+    <button class="fondo-boton" onclick="toggleFondoLista()">Fondo</button>
+    <div class="fondo-lista" id="fondoLista">
+      <a onclick="cambiarFondo('venezuela')">Venezuela</a>
+      <a onclick="cambiarFondo('mexico')">México</a>
+      <a onclick="cambiarFondo('chile')">Chile</a>
+      <a onclick="cambiarFondo('colombia')">Colombia</a>
+      <a onclick="cambiarFondo('ecuador')">Ecuador</a>
+      <a onclick="cambiarFondo('guatemala')">Guatemala</a>
+      <a onclick="cambiarFondo('el_salvador')">El Salvador</a>
+      <a onclick="cambiarFondo('rep_dominicana')">República Dominicana</a>
+      <a onclick="cambiarFondo('argentina')">Argentina</a>
+      <a onclick="cambiarFondo('costa_rica')">Costa Rica</a>
+      <a onclick="cambiarFondo('honduras')">Honduras</a>
+      <a onclick="cambiarFondo('')">Sin fondo</a>
+    </div>
+  </div>
+</div>
+
+<audio id="sonido" src="https://www.fesliyanstudios.com/play-mp3/387" preload="auto"></audio>
+<audio id="sonidoGol" src="https://cdn.pixabay.com/download/audio/2023/03/06/audio_d11352f717.mp3" preload="auto"></audio>
+<script>
+  const flags = {
+    venezuela: 'https://flagcdn.com/w320/ve.png',
+    mexico: 'https://flagcdn.com/w320/mx.png',
+    chile: 'https://flagcdn.com/w320/cl.png',
+    colombia: 'https://flagcdn.com/w320/co.png',
+    ecuador: 'https://flagcdn.com/w320/ec.png',
+    guatemala: 'https://flagcdn.com/w320/gt.png',
+    el_salvador: 'https://flagcdn.com/w320/sv.png',
+    rep_dominicana: 'https://flagcdn.com/w320/do.png',
+    argentina: 'https://flagcdn.com/w320/ar.png',
+    costa_rica: 'https://flagcdn.com/w320/cr.png',
+    honduras: 'https://flagcdn.com/w320/hn.png'
+  };
+
+  const positions = {};
+  const victorias = {};
+  const banderasEliminadas = new Set();
+  const paises = Object.keys(flags);
+
+  paises.forEach(p => {
+    positions[p] = 0;
+    victorias[p] = 0;
+  });
+
+  const maxPosition = 95;
+
+  window.onload = () => {
+    document.querySelectorAll('.runner').forEach(r => r.classList.add('idle'));
+  };
+
+  document.addEventListener('keydown', (e) => {
+    const tecla = e.key;
+    const index = parseInt(tecla) - 1;
+    
+    // Verificar si la tecla presionada es "+"
+    if (tecla === '+') {
+      const pais = 'honduras';
+      if (document.getElementById("winner").innerText !== "") return;
+      if (banderasEliminadas.has(pais)) return;
+      advance(pais, flags[pais]);
+      return;
+    }
+    
+    // Verificar si la tecla presionada es "." (punto)
+    if (tecla === '.') {
+      const pais = 'costa_rica';
+      if (document.getElementById("winner").innerText !== "") return;
+      if (banderasEliminadas.has(pais)) return;
+      advance(pais, flags[pais]);
+      return;
+    }
+    
+    if (index >= 0 && index < paises.length) {
+      const pais = paises[index];
+      if (document.getElementById("winner").innerText !== "") return;
+      if (banderasEliminadas.has(pais)) return;
+      advance(pais, flags[pais]);
+    }
+  });
+
+  function advance(pais, banderaUrl) {
+    if (banderasEliminadas.has(pais)) return;
+
+    positions[pais] += 5;
+    if (positions[pais] >= 90) {
+      positions[pais] = 90;
+      document.getElementById("winner").innerText = `¡${capitalize(pais)} ha ganado! 🎉`;
+      victorias[pais]++;
+      document.getElementById("v_" + pais).innerText = victorias[pais];
+      showVictoryAnimation(banderaUrl);
+      document.getElementById("sonidoGol").play();
+
+      setTimeout(() => {
+        reiniciarCarrera();
+      }, 5000);
+    }
+
+    const runner = document.getElementById(pais);
+    runner.style.left = positions[pais] + "%";
+    runner.classList.remove('idle', 'bouncing');
+    void runner.offsetWidth;
+    runner.classList.add('bouncing');
+    setTimeout(() => runner.classList.add('idle'), 300);
+
+    const sonido = document.getElementById("sonido");
+    sonido.currentTime = 0;
+    sonido.play();
+  }
+
+  function capitalize(str) {
+    if (str === 'mexico') return 'México';
+    if (str === 'rep_dominicana') return 'República Dominicana';
+    if (str === 'el_salvador') return 'El Salvador';
+    if (str === 'costa_rica') return 'Costa Rica';
+    if (str === 'honduras') return 'Honduras';
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  }
+
+  function reiniciarCarrera() {
+    for (let pais in positions) {
+      positions[pais] = 0;
+      const runner = document.getElementById(pais);
+      runner.style.left = "0%";
+      runner.classList.remove('bouncing');
+      runner.classList.add('idle');
+    }
+    document.getElementById("winner").innerText = "";
+  }
+
+  function showVictoryAnimation(banderaUrl) {
+    const overlay = document.createElement("div");
+    overlay.className = "flag-fullscreen";
+    overlay.innerHTML = `<img src="${banderaUrl}" alt="Ganador">`;
+    document.body.appendChild(overlay);
+
+    setTimeout(() => {
+      overlay.remove();
+    }, 2000);
+  }
+
+  function sumarVictoria(pais) {
+    victorias[pais]++;
+    document.getElementById("v_" + pais).innerText = victorias[pais];
+  }
+
+  function restarVictoria(pais) {
+    if (victorias[pais] > 0) {
+      victorias[pais]--;
+      document.getElementById("v_" + pais).innerText = victorias[pais];
+    }
+  }
+
+  function eliminarBandera(pais) {
+    const contenedor = document.getElementById("v_" + pais).closest('.bandera');
+    contenedor.classList.toggle('eliminada');
+    if (contenedor.classList.contains('eliminada')) {
+      banderasEliminadas.add(pais);
+    } else {
+      banderasEliminadas.delete(pais);
+    }
+  }
+
+  // Funciones para el selector de fondo
+  function toggleFondoLista() {
+    const lista = document.getElementById("fondoLista");
+    lista.style.display = lista.style.display === "block" ? "none" : "block";
+  }
+
+  function cambiarFondo(pais) {
+    const fondo = document.getElementById("fondoSeleccionado");
+    if (pais && flags[pais]) {
+      fondo.style.backgroundImage = `url('${flags[pais]}')`;
+      fondo.style.opacity = "0.2";
+    } else {
+      fondo.style.backgroundImage = "none";
+      fondo.style.opacity = "0";
+    }
+    toggleFondoLista();
+  }
+
+  // Cerrar el menú de fondo al hacer clic fuera
+  window.onclick = function(event) {
+    if (!event.target.matches('.fondo-boton')) {
+      const lista = document.getElementById("fondoLista");
+      if (lista.style.display === "block") {
+        lista.style.display = "none";
+      }
+    }
+  }
+</script>
+
+</body>
+</html>
