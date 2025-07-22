@@ -306,11 +306,11 @@
     <button onclick="eliminarBandera('rep_dominicana')">X</button>
   </div>
   <div class="bandera">
-    <img src="https://flagcdn.com/w80/ar.png" alt="Argentina">
-    <div class="contador" id="v_argentina">0</div>
-    <button onclick="sumarVictoria('argentina')">+</button>
-    <button onclick="restarVictoria('argentina')">−</button>
-    <button onclick="eliminarBandera('argentina')">X</button>
+    <img src="https://flagcdn.com/w80/bo.png" alt="Bolivia">
+    <div class="contador" id="v_bolivia">0</div>
+    <button onclick="sumarVictoria('bolivia')">+</button>
+    <button onclick="restarVictoria('bolivia')">−</button>
+    <button onclick="eliminarBandera('bolivia')">X</button>
   </div>
   <div class="bandera">
     <img src="https://flagcdn.com/w80/cr.png" alt="Costa Rica">
@@ -320,11 +320,11 @@
     <button onclick="eliminarBandera('costa_rica')">X</button>
   </div>
   <div class="bandera">
-    <img src="https://flagcdn.com/w80/hn.png" alt="Honduras">
-    <div class="contador" id="v_honduras">0</div>
-    <button onclick="sumarVictoria('honduras')">+</button>
-    <button onclick="restarVictoria('honduras')">−</button>
-    <button onclick="eliminarBandera('honduras')">X</button>
+    <img src="https://flagcdn.com/w80/es.png" alt="España">
+    <div class="contador" id="v_espana">0</div>
+    <button onclick="sumarVictoria('espana')">+</button>
+    <button onclick="restarVictoria('espana')">−</button>
+    <button onclick="eliminarBandera('espana')">X</button>
   </div>
 </div>
 
@@ -341,9 +341,9 @@
 </div><div class="meta">META</div></div>
 <div class="track"><div class="runner" id="el_salvador" style="background-image: url('https://flagcdn.com/w80/sv.png'); left: 0;"></div><div class="meta">META</div></div>
 <div class="track"><div class="runner" id="rep_dominicana" style="background-image: url('https://flagcdn.com/w80/do.png'); left: 0;"></div><div class="meta">META</div></div>
-<div class="track"><div class="runner" id="argentina" style="background-image: url('https://flagcdn.com/w80/ar.png'); left: 0;"></div><div class="meta">META</div></div>
+<div class="track"><div class="runner" id="bolivia" style="background-image: url('https://flagcdn.com/w80/bo.png'); left: 0;"></div><div class="meta">META</div></div>
 <div class="track"><div class="runner" id="costa_rica" style="background-image: url('https://flagcdn.com/w80/cr.png'); left: 0;"></div><div class="meta">META</div></div>
-<div class="track"><div class="runner" id="honduras" style="background-image: url('https://flagcdn.com/w80/hn.png'); left: 0;"></div><div class="meta">META</div></div>
+<div class="track"><div class="runner" id="espana" style="background-image: url('https://flagcdn.com/w80/es.png'); left: 0;"></div><div class="meta">META</div></div>
 
 <div id="winner"></div>
 <div style="display: inline-block;">
@@ -359,9 +359,9 @@
       <a onclick="cambiarFondo('guatemala')">Guatemala</a>
       <a onclick="cambiarFondo('el_salvador')">El Salvador</a>
       <a onclick="cambiarFondo('rep_dominicana')">República Dominicana</a>
-      <a onclick="cambiarFondo('argentina')">Argentina</a>
+      <a onclick="cambiarFondo('bolivia')">Bolivia</a>
       <a onclick="cambiarFondo('costa_rica')">Costa Rica</a>
-      <a onclick="cambiarFondo('honduras')">Honduras</a>
+      <a onclick="cambiarFondo('espana')">España</a>
       <a onclick="cambiarFondo('')">Sin fondo</a>
     </div>
   </div>
@@ -379,9 +379,9 @@
     guatemala: 'https://flagcdn.com/w320/gt.png',
     el_salvador: 'https://flagcdn.com/w320/sv.png',
     rep_dominicana: 'https://flagcdn.com/w320/do.png',
-    argentina: 'https://flagcdn.com/w320/ar.png',
+    bolivia: 'https://flagcdn.com/w320/bo.png',
     costa_rica: 'https://flagcdn.com/w320/cr.png',
-    honduras: 'https://flagcdn.com/w320/hn.png'
+    espana: 'https://flagcdn.com/w320/es.png'
   };
 
   const positions = {};
@@ -406,7 +406,7 @@
     
     // Verificar si la tecla presionada es "+"
     if (tecla === '+') {
-      const pais = 'honduras';
+      const pais = 'espana';
       if (document.getElementById("winner").innerText !== "") return;
       if (banderasEliminadas.has(pais)) return;
       advance(pais, flags[pais]);
@@ -464,7 +464,8 @@
     if (str === 'rep_dominicana') return 'República Dominicana';
     if (str === 'el_salvador') return 'El Salvador';
     if (str === 'costa_rica') return 'Costa Rica';
-    if (str === 'honduras') return 'Honduras';
+    if (str === 'espana') return 'España';
+    if (str === 'bolivia') return 'Bolivia';
     return str.charAt(0).toUpperCase() + str.slice(1);
   }
 
